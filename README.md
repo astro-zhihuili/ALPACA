@@ -23,6 +23,6 @@ If you find ALPACA useful in your research, please cite Li et al. (2023).
 
 License 
 -------
-ALPACA is publicly available under the GPL-3.0 license.
+ALPACA is publicly available under the MIT license.
 
 Copyright 2023 Zhihui Li and contributors.
