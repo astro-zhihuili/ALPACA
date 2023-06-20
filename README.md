@@ -14,9 +14,11 @@ get_abs_profile(): This function takes in a set of physical parameters of the cl
 
 get_absorption_line_profile(): This function extracts an observed absorption line profile for fitting. The format for the data file should be: [velocity (km/s), normalized flux density, normalized flux density uncertainty]. 
 
-run_nested(): This function performs a joint fitting of down-the-barrel absorption line profile and a EW v.s. b profile. A fitting run can be started via: python3 joint_fitting.py
+run_nested(): This function uses the nested sampling algorithm to perform a joint fitting of down-the-barrel absorption line profile and a EW v.s. b profile. A joint fitting run can be started via: python3 joint_fitting.py
 
-Citations:
+All these functions can be easily modified for other purposes, e.g. plotting model absorption line profiles, or fitting a particular type of dataset.
+
+Citations
 -------
 
 If you find ALPACA useful in your research, please cite Li et al. (2023).
