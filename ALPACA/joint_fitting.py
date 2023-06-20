@@ -3,19 +3,28 @@ import matplotlib as mpl
 mpl.use('Agg')
 from astropy.convolution import Gaussian1DKernel, convolve
 import os
-import numba
-from numba import jit
 
 from dynesty import NestedSampler
 from dynesty import plotting as dyplot
 from dynesty import utils as dyfunc
 import pickle
 
-from get_abs_profile_and_EW import get_abs_profile_and_EW, varr_axis
-from get_EW_at_b import get_EW_at_b, delta_x
-import radial_velocity_profile_params
-import voigt_function
 from constants import kms, lambda13_cm, vth, delta_nu_doppler, a31, pc, G, Msun, clight, nu13, sigma13_factor
+from get_abs_profile import get_abs_profile
+from get_EW_at_b import get_EW_at_b
+import radial_velocity_profile_params
+
+varr_axis = np.linspace(-1500*kms, 1500*kms, 301)    # axis for the observed velocity
+
+Nx = 200
+
+delta_x = 1.0
+
+x_array_1d = np.linspace(-100, 100, Nx)  # array of observed unitless frequencies
+
+b_array = np.array([33, 66, 99]) * 1000 * pc  # three impact parameters where EW is evaluated
+
+Ns_array = np.array([5000, 3000, 1000])   # number of line segments used for three impact parameters
 
 # observed EW at three impact parameters with one sigma uncertainties
 
@@ -63,7 +72,7 @@ def run_nested(left_bound, right_bound, name, line):
         
         normflux_subtracted = normflux - ISM_component
         
-        model_v, model_I_unconvolved_2d, factor_array_2d_b1, factor_array_2d_b2, factor_array_2d_b3 = get_abs_profile_and_EW(alpha, Fv, vinf * kms, gamma, logNcl_0, rand_v, varr_axis)
+        model_v, model_I_unconvolved_2d = get_abs_profile(alpha, Fv, vinf * kms, gamma, logNcl_0, rand_v, varr_axis)
         
         model_I_unconvolved = np.flip(np.product(model_I_unconvolved_2d, axis=1)) # doing product along the clump outflow velocity axis to derive I_obs v.s. v_obs profile
         
@@ -71,7 +80,7 @@ def run_nested(left_bound, right_bound, name, line):
         
         max_model_I = np.max(model_I)
         
-        model_I /= max_model_I
+        model_I /= max_model_I   # making sure the model spectrum is normalized
         
         fltr = (velocity <= right_bound) & (velocity >= left_bound)
         
@@ -87,13 +96,12 @@ def run_nested(left_bound, right_bound, name, line):
         # calculating the EW v.s. b profile predicted by the model
         
         EW_b_array = np.zeros(3)
+        
+        for i in range(len(EW_b_array)):
+            factor_array_2d = get_EW_at_b(b_array[i], Ns_array[i], Nx, x_array_1d, alpha, Fv, vinf, gamma, logNcl_0, rand_v)
+            
+            EW_b_array[i] = lambda13_cm * vth / clight * np.sum((1 - np.prod(factor_array_2d, axis = 0)) * delta_x) / (1e-8)
                 
-        EW_b_array[0] = lambda13_cm * vth / clight * np.sum((1 - np.prod(factor_array_2d_b1, axis = 0)) * delta_x) / (1e-8) 
-        
-        EW_b_array[1] = lambda13_cm * vth / clight * np.sum((1 - np.prod(factor_array_2d_b2, axis = 0)) * delta_x) / (1e-8) 
-        
-        EW_b_array[2] = lambda13_cm * vth / clight * np.sum((1 - np.prod(factor_array_2d_b3, axis = 0)) * delta_x) / (1e-8) 
-        
         lnp_EW = -0.5 * np.sum((EW_CII1334_array - EW_b_array)**2 * invvar_b - np.log(invvar_b)) # calculating the likelihood for the EW v.s. b profile
         
         if np.isnan(lnp_EW) == True:
