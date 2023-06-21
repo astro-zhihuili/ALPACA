@@ -21,7 +21,7 @@ All these functions can be easily modified for other purposes, e.g. plotting mod
 Citations
 -------
 
-If you find ALPACA useful in your research, please cite Li et al. (2023).
+If you find ALPACA useful in your research, please cite Li et al. (2023): http://arxiv.org/abs/2306.11089
 
 License 
 -------
