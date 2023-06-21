@@ -40,9 +40,9 @@ def get_absorption_line_profile(name, wavelength):
     
     '''This function extracts the observed DTB absorption profile for fitting.'''
     
-    velocity = np.loadtxt('LyC_absorption_lines/%s_%s.txt'%(name, wavelength))[:,0]
-    normflux = np.loadtxt('LyC_absorption_lines/%s_%s.txt'%(name, wavelength))[:,1]
-    normfluxerr = np.loadtxt('LyC_absorption_lines/%s_%s.txt'%(name, wavelength))[:,2]
+    velocity = np.loadtxt('LBG_absorption_lines/%s_%s.txt'%(name, wavelength))[:,0]
+    normflux = np.loadtxt('LBG_absorption_lines/%s_%s.txt'%(name, wavelength))[:,1]
+    normfluxerr = np.loadtxt('LBG_absorption_lines/%s_%s.txt'%(name, wavelength))[:,2]
     
     return velocity, normflux, normfluxerr
 
@@ -109,8 +109,8 @@ def run_nested(left_bound, right_bound, name, line):
         
         return lnp_spec + lnp_EW
     
-    if not os.path.exists("LyC_absorption_lines/%s_%s_table"%(name, line)):
-        os.makedirs("LyC_absorption_lines/%s_%s_table"%(name, line))
+    if not os.path.exists("LBG_absorption_lines/%s_%s_table"%(name, line)):
+        os.makedirs("LBG_absorption_lines/%s_%s_table"%(name, line))
     
     p = np.random.randint(1,999)
     sampler = NestedSampler(loglikelihood, prior_transform, ndim=6, nlive=600) 
@@ -123,7 +123,7 @@ def run_nested(left_bound, right_bound, name, line):
 
     tfig, taxes = dyplot.traceplot(results)
     
-    tfig.savefig("LyC_absorption_lines/%s_%s_table/trace_%s.png"%(name, line, p), dpi=100)
+    tfig.savefig("LBG_absorption_lines/%s_%s_table/trace_%s.png"%(name, line, p), dpi=100)
     
     max_logl = np.max(results.logl)
     max_params = samples[np.argmax(results.logl)]
@@ -131,7 +131,7 @@ def run_nested(left_bound, right_bound, name, line):
     # Plot the 2-D marginalized posteriors. 
     
     cfig, caxes = dyplot.cornerplot(results, quantiles=[0.16, 0.5, 0.84], show_titles=True, span=6*[0.99], truths = max_params, truth_color='red', truth_kwargs={"linestyle": "dashed"}, labels = [r'$A_{\rm ISM}$', r'$\sigma_{\rm ISM}$', r'${\rm log}\,F_{\rm V}$', r'$\mathcal{V}\,(\rm km\,s^{-1})$', r'$\alpha$', r'$\gamma$'], title_kwargs={"fontsize": 12}, title_fmt = '.2f', label_kwargs=dict(fontsize=15))
-    cfig.savefig("LyC_absorption_lines/%s_%s_table/posterior_%s.png"%(name, line, p), dpi=100)
+    cfig.savefig("LBG_absorption_lines/%s_%s_table/posterior_%s.png"%(name, line, p), dpi=100)
 
     # Compute 16%-84% quantiles. 
     
@@ -142,7 +142,7 @@ def run_nested(left_bound, right_bound, name, line):
     
     mean, cov = dyfunc.mean_and_cov(samples, weights)
 
-    text_file = open("LyC_absorption_lines/%s_%s_table/Results_%s.txt"%(name, line, p), "w")
+    text_file = open("LBG_absorption_lines/%s_%s_table/Results_%s.txt"%(name, line, p), "w")
     text_file.write("Max LogLikelihood: %s \n" % max_logl)
     text_file.write("Best-fit Parameters: %s \n" % max_params)
     text_file.write("Quantiles: %s \n" % quantiles)
@@ -150,18 +150,18 @@ def run_nested(left_bound, right_bound, name, line):
     text_file.write("Cov: %s \n" % cov)
     text_file.close()
 
-    with open("LyC_absorption_lines/%s_%s_table/results_%s.pkl"%(name, line, p), "wb") as f:
+    with open("LBG_absorption_lines/%s_%s_table/results_%s.pkl"%(name, line, p), "wb") as f:
         pickle.dump(results, f)
 
-    np.save("LyC_absorption_lines/%s_%s_table/samples_%s.npy"%(name, line, p), samples)
-    np.save("LyC_absorption_lines/%s_%s_table/weights_%s.npy"%(name, line, p), weights)
+    np.save("LBG_absorption_lines/%s_%s_table/samples_%s.npy"%(name, line, p), samples)
+    np.save("LBG_absorption_lines/%s_%s_table/weights_%s.npy"%(name, line, p), weights)
 
     return
 
 
 if __name__ == "__main__":   
 
-    name = 'Lyc_zneb'
+    name = 'LBG_zneb'
     line = '1334.5'
 
     left_bound = -850.0   # velocity ranges where absorption is seen
